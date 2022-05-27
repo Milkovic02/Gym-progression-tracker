@@ -8,7 +8,7 @@ static int brojVjezbi = 0;
 
 void kreiranjeDatoteke() {
 	FILE* pF = NULL;
-	
+
 	pF = fopen("trening.bin", "wb");
 
 	if (pF == NULL) {
@@ -26,7 +26,7 @@ void dodajVjezbu() {
 		exit(EXIT_FAILURE);
 	}
 	fread(&brojVjezbi, sizeof(int), 1, pF);
-	
+
 	VJEZBE temp = { 0 };
 	getchar();
 	printf("Unesite ime vjezbe:\n");
@@ -46,17 +46,17 @@ void dodajVjezbu() {
 void* ucitavanjeVjezbi() {
 	FILE* pF = fopen("trening.bin", "rb");
 	if (pF == NULL) {
-		perror("Ucitavanje vjezbi iz datoteke trening.bin");
+		perror("Nijedna vjezba nije dodana u program.");
 		return NULL;
-		//exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 	fread(&brojVjezbi, sizeof(int), 1, pF);
-	printf("brojVjezbi: %d\n", brojVjezbi);
-	VJEZBE* poljeVjezbi = (VJEZBE*)calloc(brojVjezbi, sizeof(VJEZBE));
+	VJEZBE* poljeVjezbi = NULL;
+	poljeVjezbi = (VJEZBE*)calloc(brojVjezbi, sizeof(VJEZBE));
 	if (poljeVjezbi == NULL) {
-		perror("Zauzimanje memorije za studente");
+		perror("Zauzimanje memorije...");
 		return NULL;
-		//exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 	fread(poljeVjezbi, sizeof(VJEZBE), brojVjezbi, pF);
 	return poljeVjezbi;
@@ -70,7 +70,7 @@ void ispisivanjeVjezbi(const VJEZBE* const poljeVjezbi) {
 	int i;
 	for (i = 0; i < brojVjezbi; i++)
 	{
-		printf("%s -> %d serije x %d ponavljanja\n",
+		printf("%45s -> %d serije x %d ponavljanja\n",
 			(poljeVjezbi + i)->imeVjezbe,
 			(poljeVjezbi + i)->sets,
 			(poljeVjezbi + i)->reps);
@@ -78,25 +78,25 @@ void ispisivanjeVjezbi(const VJEZBE* const poljeVjezbi) {
 }
 void* pretrazivanjeVjezbi(VJEZBE* const poljeVjezbi) {
 	if (poljeVjezbi == NULL) {
-		printf("Polje studenata je prazno!\n");
+		printf("Nema nijedne vjezbe.\n");
 		return NULL;
 	}
 	int i;
 	char trazenoIme[20] = { '\0' };
-	printf("Unesite trazeni kriterij za pronalazak studenta.\n");
+	printf("Pretrazivanje vjezbe:\n");
 	getchar();
 	scanf(" %19[^\n]", trazenoIme);
 	for (i = 0; i < brojVjezbi; i++)
 	{
 		if (!strcmp(trazenoIme, (poljeVjezbi + i)->imeVjezbe)) {
-			printf("Student je pronaden!\n");
+			printf("Trazena vjezba: %45s", poljeVjezbi + i);
 			return (poljeVjezbi + i);
 		}
 	}
 	return NULL;
 }
 
-void brisanjeVjezbe(VJEZBE** const trazenaVjezba, const VJEZBE* const poljeVjezbi) 
+void brisanjeVjezbe(VJEZBE** const trazenaVjezba, const VJEZBE* const poljeVjezbi)
 {
 	FILE* pF = fopen("trening.bin", "wb");
 	if (pF == NULL) {
@@ -132,4 +132,58 @@ void brisanjeDatoteke() {
 int izlazIzPrograma(VJEZBE* poljeVjezbi) {
 	free(poljeVjezbi);
 	return 0;
+}
+
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include "header.h"
+
+int izbornik() {
+	printf("====================");
+	printf("Odaberite jednu od ponudenih opcija:");
+	printf("====================\n");
+
+	printf("\n\t\t\tOpcija 1: dodavanje vjezbe u program\n");
+	printf("\t\t\tOpcija 2: ispisivanje vjezbi!\n");
+	printf("\t\t\tOpcija 3: pretrazivanje vjezbi!\n");
+	printf("\t\t\tOpcija 4: brisanje vjezbe!\n");
+	printf("\t\t\tOpcija 5: brisanje datoteke!\n");
+	printf("\n\t\t\tOpcija 0: izlaz iz programa!\n");
+	printf("======================================\
+======================================\n");
+
+	int uvijet = 0;
+	static VJEZBE* poljeVjezbi = NULL;
+	static VJEZBE* pronadenaVjezba = NULL;
+	scanf("%d", &uvijet);
+	system("cls");
+
+	switch (uvijet) {
+	case 0:
+		uvijet = izlazIzPrograma(poljeVjezbi);
+		break;
+	case 1:
+		ucitavanjeVjezbi();
+		if (brojVjezbi == 0) {
+			kreiranjeDatoteke();
+		}
+		dodajVjezbu(poljeVjezbi);
+		break;
+	case 2:
+		ispisivanjeVjezbi(poljeVjezbi);
+		break;
+	case 3:
+		pronadenaVjezba = (VJEZBE*)pretrazivanjeVjezbi(poljeVjezbi);
+		break;
+	case 4:
+		brisanjeVjezbe(&pronadenaVjezba, poljeVjezbi, "trening.bin");
+		break;
+	case 5:
+		brisanjeDatoteke("trening.bin");
+		break;
+	default:
+		uvijet = 0;
+	}
+	return uvijet;
 }
