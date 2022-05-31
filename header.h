@@ -7,7 +7,7 @@ typedef struct vjezbe {
 	int reps;
 }VJEZBE;
 
-int izbornik();
+int glavniIzbornik();
 void kreiranjeDatoteke();
 void dodajVjezbu();
 void* ucitavanjeVjezbi();
@@ -19,4 +19,4 @@ int izlazIzPrograma(VJEZBE*);
 
 #endif //HEADER_H
 
-
+
