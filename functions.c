@@ -8,7 +8,6 @@ static int brojVjezbi = 0;
 
 void kreiranjeDatoteke() {
 	FILE* pF = NULL;
-
 	pF = fopen("trening.bin", "wb");
 
 	if (pF == NULL) {
@@ -19,8 +18,12 @@ void kreiranjeDatoteke() {
 }
 
 void dodajVjezbu() {
-	kreiranjeDatoteke();
 	FILE* pF = fopen("trening.bin", "rb+");
+	if (pF == NULL) {
+	kreiranjeDatoteke();
+	}
+	
+	
 	if (pF == NULL) {
 		perror("Dodavanje vjezbi u datoteke trening.bin");
 		exit(EXIT_FAILURE);
@@ -64,6 +67,11 @@ void* ucitavanjeVjezbi() {
 void ispisivanjeVjezbi(const VJEZBE* const poljeVjezbi) {
 
 	if (poljeVjezbi == NULL) {
+		printf("Polje vjezbi je prazno");
+		return;
+	}
+
+	if (brojVjezbi == 0) {
 		printf("Nijedna vjezba nije unesena.\n");
 		return;
 	}
@@ -76,31 +84,13 @@ void ispisivanjeVjezbi(const VJEZBE* const poljeVjezbi) {
 			(poljeVjezbi + i)->reps);
 	}
 }
-void* pretrazivanjeVjezbi(VJEZBE* const poljeVjezbi) {
-	if (poljeVjezbi == NULL) {
-		printf("Nema nijedne vjezbe.\n");
-		return NULL;
-	}
-	int i;
-	char trazenoIme[20] = { '\0' };
-	printf("Pretrazivanje vjezbe:\n");
-	getchar();
-	scanf(" %19[^\n]", trazenoIme);
-	for (i = 0; i < brojVjezbi; i++)
-	{
-		if (!strcmp(trazenoIme, (poljeVjezbi + i)->imeVjezbe)) {
-			printf("Trazena vjezba: %45s", poljeVjezbi + i);
-			return (poljeVjezbi + i);
-		}
-	}
-	return NULL;
-}
 
-void brisanjeVjezbe(VJEZBE** const trazenaVjezba, const VJEZBE* const poljeVjezbi)
+
+void brisanjeTreninga(VJEZBE** const trazenaVjezba, const VJEZBE* const poljeVjezbi)
 {
 	FILE* pF = fopen("trening.bin", "wb");
 	if (pF == NULL) {
-		perror("Brisanje studenta iz datoteke trening.bin");
+		perror("Brisanje vjezbi iz datoteke trening.bin");
 		exit(EXIT_FAILURE);
 	}
 	fseek(pF, sizeof(int), SEEK_SET);
@@ -121,7 +111,7 @@ void brisanjeVjezbe(VJEZBE** const trazenaVjezba, const VJEZBE* const poljeVjezb
 }
 void brisanjeDatoteke() {
 	printf("Zelite li uistinu obrisati datoteku %s?\n", "trening.bin");
-	printf("Utipkajte \"da\" ako uistinu želite obrisati datoteku u suprotno utipkajte\ \"ne\"!\n");
+	printf("Utipkajte \"da\" ako uistinu ï¿½elite obrisati datoteku u suprotno utipkajte\ \"ne\"!\n");
 	char potvrda[3] = { '\0' };
 	scanf(" %2s", potvrda);
 	if (!strcmp("da", potvrda)) {
@@ -139,19 +129,16 @@ int izlazIzPrograma(VJEZBE* poljeVjezbi) {
 #include <stdlib.h>
 #include "header.h"
 
-int izbornik() {
-	printf("====================");
-	printf("Odaberite jednu od ponudenih opcija:");
-	printf("====================\n");
+int glavniIzbornik() {
 
-	printf("\n\t\t\tOpcija 1: dodavanje vjezbe u program\n");
-	printf("\t\t\tOpcija 2: ispisivanje vjezbi!\n");
-	printf("\t\t\tOpcija 3: pretrazivanje vjezbi!\n");
-	printf("\t\t\tOpcija 4: brisanje vjezbe!\n");
-	printf("\t\t\tOpcija 5: brisanje datoteke!\n");
-	printf("\n\t\t\tOpcija 0: izlaz iz programa!\n");
-	printf("======================================\
-======================================\n");
+	printf("/======- Odaberite opciju -======\\\n");
+	printf(" |\t\t\t\t|");
+	printf("\n |\t1. Odabir treninga\t|\n"); //
+	printf(" |\t2. Tezina i visina\t|\n");
+	printf(" |\t3. Prikaz napretka\t|\n");
+	printf(" |\t\t\t\t|\n");
+	printf(" |\t0. Izlaz iz programa!\t|\n");
+	printf(" |______________________________|\n");
 
 	int uvijet = 0;
 	static VJEZBE* poljeVjezbi = NULL;
@@ -164,26 +151,36 @@ int izbornik() {
 		uvijet = izlazIzPrograma(poljeVjezbi);
 		break;
 	case 1:
-		ucitavanjeVjezbi();
-		if (brojVjezbi == 0) {
-			kreiranjeDatoteke();
-		}
-		dodajVjezbu(poljeVjezbi);
+		treningIzbornik();
 		break;
 	case 2:
 		ispisivanjeVjezbi(poljeVjezbi);
 		break;
 	case 3:
-		pronadenaVjezba = (VJEZBE*)pretrazivanjeVjezbi(poljeVjezbi);
+		brisanjeTreninga(&pronadenaVjezba, poljeVjezbi);
 		break;
 	case 4:
-		brisanjeVjezbe(&pronadenaVjezba, poljeVjezbi, "trening.bin");
-		break;
-	case 5:
 		brisanjeDatoteke("trening.bin");
 		break;
 	default:
 		uvijet = 0;
 	}
 	return uvijet;
+}
+
+int treningIzbornik() {
+
+	printf("/================================\\\n");
+	printf(" |\t\t\t\t|");
+	printf("\n |\t1) TRENING 1\t\t|\n"); //
+	printf(" |\t2) TRENING 2\t\t|\n");
+	printf(" |\t3) TRENING 3\t\t|\n");
+	printf(" |\t4) TRENING 4\t\t|\n");
+	printf(" |\t5) TRENING 5\t\t|\n");
+	printf(" |\t6) TRENING 6\t\t|\n");
+	printf(" |\t7) TRENING 7\t\t|\n");
+	printf(" |\t\t\t\t|\n");
+	printf(" |\t0) Povratak na izbornik\t|\n");
+	printf(" |______________________________|\n");
+
 }
