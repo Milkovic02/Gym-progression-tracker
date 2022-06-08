@@ -7,28 +7,28 @@
 static int brojVjezbi = 0;
 
 void kreiranjeDatoteke() {
-	FILE* pF = NULL;
-	pF = fopen("trening.bin", "wb");
+	FILE* fp = NULL;
+	fp = fopen("trening.bin", "wb");
 
-	if (pF == NULL) {
+	if (fp == NULL) {
 		perror("Kreiranje datoteke trening.bin");
 	}
-	fwrite(&brojVjezbi, sizeof(int), 1, pF);
-	fclose(pF);
+	fwrite(&brojVjezbi, sizeof(int), 1, fp);
+	fclose(fp);
 }
 
 void dodajVjezbu() {
-	FILE* pF = fopen("trening.bin", "rb+");
-	if (pF == NULL) {
-	kreiranjeDatoteke();
+	FILE* fp = fopen("trening.bin", "rb+");
+	if (fp == NULL) {
+		kreiranjeDatoteke();
 	}
-	
-	
-	if (pF == NULL) {
+
+
+	if (fp == NULL) {
 		perror("Dodavanje vjezbi u datoteke trening.bin");
 		exit(EXIT_FAILURE);
 	}
-	fread(&brojVjezbi, sizeof(int), 1, pF);
+	fread(&brojVjezbi, sizeof(int), 1, fp);
 
 	VJEZBE temp = { 0 };
 	getchar();
@@ -39,21 +39,22 @@ void dodajVjezbu() {
 	printf("Unesite broj ponavljanja:\n");
 	scanf("%d", &temp.reps);
 
-	fseek(pF, sizeof(VJEZBE) * brojVjezbi, SEEK_CUR);
-	fwrite(&temp, sizeof(VJEZBE), 1, pF);
-	rewind(pF);
+	fseek(fp, sizeof(VJEZBE) * brojVjezbi, SEEK_CUR);
+	fwrite(&temp, sizeof(VJEZBE), 1, fp);
+	rewind(fp);
 	brojVjezbi++;
-	fwrite(&brojVjezbi, sizeof(int), 1, pF);
-	fclose(pF);
+	fwrite(&brojVjezbi, sizeof(int), 1, fp);
+	fclose(fp);
 }
 void* ucitavanjeVjezbi() {
-	FILE* pF = fopen("trening.bin", "rb");
-	if (pF == NULL) {
+	FILE* fp = fopen("trening.bin", "rb");
+	if (fp == NULL) {
 		perror("Nijedna vjezba nije dodana u program.");
 		return NULL;
 		exit(EXIT_FAILURE);
 	}
-	fread(&brojVjezbi, sizeof(int), 1, pF);
+
+	fread(&brojVjezbi, sizeof(int), 1, fp);
 	VJEZBE* poljeVjezbi = NULL;
 	poljeVjezbi = (VJEZBE*)calloc(brojVjezbi, sizeof(VJEZBE));
 	if (poljeVjezbi == NULL) {
@@ -61,7 +62,7 @@ void* ucitavanjeVjezbi() {
 		return NULL;
 		exit(EXIT_FAILURE);
 	}
-	fread(poljeVjezbi, sizeof(VJEZBE), brojVjezbi, pF);
+	fread(poljeVjezbi, sizeof(VJEZBE), brojVjezbi, fp);
 	return poljeVjezbi;
 }
 void ispisivanjeVjezbi(const VJEZBE* const poljeVjezbi) {
@@ -70,7 +71,7 @@ void ispisivanjeVjezbi(const VJEZBE* const poljeVjezbi) {
 		printf("Polje vjezbi je prazno");
 		return;
 	}
-
+		
 	if (brojVjezbi == 0) {
 		printf("Nijedna vjezba nije unesena.\n");
 		return;
@@ -88,24 +89,24 @@ void ispisivanjeVjezbi(const VJEZBE* const poljeVjezbi) {
 
 void brisanjeTreninga(VJEZBE** const trazenaVjezba, const VJEZBE* const poljeVjezbi)
 {
-	FILE* pF = fopen("trening.bin", "wb");
-	if (pF == NULL) {
+	FILE* fp = fopen("trening.bin", "wb");
+	if (fp == NULL) {
 		perror("Brisanje vjezbi iz datoteke trening.bin");
 		exit(EXIT_FAILURE);
 	}
-	fseek(pF, sizeof(int), SEEK_SET);
+	fseek(fp, sizeof(int), SEEK_SET);
 	int i;
 	int noviBrojacVjezbi = 0;
 	for (i = 0; i < brojVjezbi; i++)
 	{
 		if (*trazenaVjezba != (poljeVjezbi + i)) {
-			fwrite((poljeVjezbi + i), sizeof(VJEZBE), 1, pF);
+			fwrite((poljeVjezbi + i), sizeof(VJEZBE), 1, fp);
 			noviBrojacVjezbi++;
 		}
 	}
-	rewind(pF);
-	fwrite(&noviBrojacVjezbi, sizeof(int), 1, pF);
-	fclose(pF);
+	rewind(fp);
+	fwrite(&noviBrojacVjezbi, sizeof(int), 1, fp);
+	fclose(fp);
 	printf("Vjezba je uspjesno izbrisana!\n");
 	*trazenaVjezba = NULL;
 }
@@ -123,11 +124,6 @@ int izlazIzPrograma(VJEZBE* poljeVjezbi) {
 	free(poljeVjezbi);
 	return 0;
 }
-
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <stdlib.h>
-#include "header.h"
 
 int glavniIzbornik() {
 
@@ -151,19 +147,21 @@ int glavniIzbornik() {
 		uvijet = izlazIzPrograma(poljeVjezbi);
 		break;
 	case 1:
+		kreiranjeDatoteke();
 		treningIzbornik();
 		break;
 	case 2:
-		ispisivanjeVjezbi(poljeVjezbi);
+		bmiCalc();
 		break;
 	case 3:
-		brisanjeTreninga(&pronadenaVjezba, poljeVjezbi);
+
 		break;
 	case 4:
-		brisanjeDatoteke("trening.bin");
+
 		break;
 	default:
-		uvijet = 0;
+		printf("Odabrali ste opciju koja ne postoji.");
+		glavniIzbornik();
 	}
 	return uvijet;
 }
@@ -172,7 +170,7 @@ int treningIzbornik() {
 
 	printf("/================================\\\n");
 	printf(" |\t\t\t\t|");
-	printf("\n |\t1) TRENING 1\t\t|\n"); //
+	printf("\n |\t1) TRENING 1\t\t|\n"); 
 	printf(" |\t2) TRENING 2\t\t|\n");
 	printf(" |\t3) TRENING 3\t\t|\n");
 	printf(" |\t4) TRENING 4\t\t|\n");
@@ -180,7 +178,79 @@ int treningIzbornik() {
 	printf(" |\t6) TRENING 6\t\t|\n");
 	printf(" |\t7) TRENING 7\t\t|\n");
 	printf(" |\t\t\t\t|\n");
+	printf(" |\t\t\t\t|\n");
 	printf(" |\t0) Povratak na izbornik\t|\n");
 	printf(" |______________________________|\n");
 
+	int uvijet;
+	printf("Unesite broj: ");
+	scanf("%d", &uvijet);
+	system("cls");
+
+	switch (uvijet) {
+	case 1:
+		treningMenu();
+		break;
+	case 2:
+
+		break;
+	case 3:
+
+		break;
+	case 4:
+
+		break;
+	case 5:
+
+		break;
+	case 6:
+
+		break;
+	case 7:
+
+		break;
+	default:
+		printf("Odabrali ste opciju koja ne postoji.");
+		treningIzbornik();
+	}
+
+	return uvijet;
+}
+
+int treningMenu() {
+	
+	char vjezba[40];
+	int i = 1;
+		do {
+			printf("Unesite ime %d. vjezbe:\n", i);
+			scanf("%39s", &vjezba);
+			i++;
+		}
+
+}
+
+int bmiCalc() {
+
+	float weight, height, bodyfat, bmi = 0;
+	int age;
+	char gender;
+
+	printf("Unesite svoje godine: ");
+	scanf("%d", &age);
+	printf("Unesite svoj spol [M/F]: ");
+	scanf("%s", &gender);
+	
+	printf("Unesite svoju kilazu [kg]: ");
+	scanf("%f", &weight);
+	printf("Unesite svoju visinu [m]: ");
+	scanf("%f", &height);
+	printf("[NEOBAVEZNO] Unesite svoj postotak masti [%%]: ");
+	scanf("%f", &bodyfat);
+
+	height = pow(height, 2);
+	bmi = weight / height;
+
+	printf("BMI: %f", bmi);
+
+	return;
 }
