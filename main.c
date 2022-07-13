@@ -3,7 +3,7 @@
 #include "header.h"
 
 int main(void) {
-
+	kreiranjeDatoteke();
 	int uvijet = 1;
 
 	while (uvijet) {
