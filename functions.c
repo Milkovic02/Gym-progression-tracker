@@ -23,7 +23,6 @@ void dodajVjezbu() {
 		kreiranjeDatoteke();
 	}
 
-
 	if (fp == NULL) {
 		perror("Dodavanje vjezbi u datoteke trening.bin");
 		exit(EXIT_FAILURE);
@@ -71,7 +70,7 @@ void ispisivanjeVjezbi(const VJEZBE* const poljeVjezbi) {
 		printf("Polje vjezbi je prazno");
 		return;
 	}
-		
+
 	if (brojVjezbi == 0) {
 		printf("Nijedna vjezba nije unesena.\n");
 		return;
@@ -130,7 +129,7 @@ int glavniIzbornik() {
 	printf("/======- Odaberite opciju -======\\\n");
 	printf(" |\t\t\t\t|");
 	printf("\n |\t1. Odabir treninga\t|\n"); //
-	printf(" |\t2. Tezina i visina\t|\n");
+	printf(" |\t2. BMI\t\t\t|\n");
 	printf(" |\t3. Prikaz napretka\t|\n");
 	printf(" |\t\t\t\t|\n");
 	printf(" |\t0. Izlaz iz programa!\t|\n");
@@ -170,7 +169,7 @@ int treningIzbornik() {
 
 	printf("/================================\\\n");
 	printf(" |\t\t\t\t|");
-	printf("\n |\t1) TRENING 1\t\t|\n"); 
+	printf("\n |\t1) TRENING 1\t\t|\n");
 	printf(" |\t2) TRENING 2\t\t|\n");
 	printf(" |\t3) TRENING 3\t\t|\n");
 	printf(" |\t4) TRENING 4\t\t|\n");
@@ -188,8 +187,11 @@ int treningIzbornik() {
 	system("cls");
 
 	switch (uvijet) {
+	case 0:
+		glavniIzbornik():
+		break;
 	case 1:
-		treningMenu();
+		
 		break;
 	case 2:
 
@@ -218,19 +220,14 @@ int treningIzbornik() {
 }
 
 int treningMenu() {
-	
-	char vjezba[40];
-	int i = 1;
-		do {
-			printf("Unesite ime %d. vjezbe:\n", i);
-			scanf("%39s", &vjezba);
-			i++;
-		}
+
+
 
 }
 
 int bmiCalc() {
-
+	
+	int bmr = 0;
 	float weight, height, bodyfat, bmi = 0;
 	int age;
 	char gender;
@@ -239,18 +236,27 @@ int bmiCalc() {
 	scanf("%d", &age);
 	printf("Unesite svoj spol [M/F]: ");
 	scanf("%s", &gender);
-	
+
 	printf("Unesite svoju kilazu [kg]: ");
 	scanf("%f", &weight);
-	printf("Unesite svoju visinu [m]: ");
+	printf("Unesite svoju visinu [cm]: ");
 	scanf("%f", &height);
 	printf("[NEOBAVEZNO] Unesite svoj postotak masti [%%]: ");
 	scanf("%f", &bodyfat);
 
-	height = pow(height, 2);
-	bmi = weight / height;
+	if (gender == 'M') {
+		bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+	}
+	
+	if (gender == 'F') {
+		bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+	}
+	float mheight = height / 100;
+	float msqheight = mheight * mheight;
 
-	printf("BMI: %f", bmi);
+	bmi = weight / msqheight;
 
-	return;
+	printf("BMI: %f\n", bmi);
+	printf("BMR: %d kalorija", bmr);
+
 }
