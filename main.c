@@ -7,7 +7,7 @@ int main(void) {
 	int uvijet = 1;
 
 	while (uvijet) {
-		uvijet = glavniIzbornik();
+		uvijet = izbornik();
 	}
 
 	printf("Zavrsetak programa!\n");
